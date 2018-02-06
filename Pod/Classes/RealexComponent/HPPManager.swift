@@ -181,10 +181,20 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
     open var supplementaryData:Dictionary<String, String>! = [:]
 
     /**
+     * Headers fields for request producer endpoint
+     */
+    open var reqestProducerHeaders:Dictionary<String, String>! = [:]
+
+    /**
+     * Headers fields for response consumer endpoint
+     */
+    open var responseConsumerHeaders:Dictionary<String, String>! = [:]
+    
+    /**
      * The HPPManager's delegate to receive the result of the interaction.
      */
     open var delegate:HPPManagerDelegate?
-
+    
     /**
      * Dictionary to hold the reqeust sent to HPP.
      */
@@ -355,7 +365,10 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("*/*", forHTTPHeaderField: "Accept")
         request.httpBody = self.getParametersString().data(using: String.Encoding.utf8)
-
+        
+        for (key, value) in reqestProducerHeaders {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
 
         let session = URLSession.shared
         let dataTask = session.dataTask(with: request as URLRequest, completionHandler: { (data:Data?, response:URLResponse?, error:Error?) -> Void in
@@ -419,6 +432,10 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("*/*", forHTTPHeaderField: "Accept")
+        
+        for (key, value) in responseConsumerHeaders {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
         
         let parameters = "hppResponse=" + hppResponse
 
