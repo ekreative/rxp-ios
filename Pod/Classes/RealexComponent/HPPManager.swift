@@ -183,7 +183,7 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
     /**
      * Headers fields for request producer endpoint
      */
-    open var reqestProducerHeaders:Dictionary<String, String>! = [:]
+    open var requestProducerHeaders:Dictionary<String, String>! = [:]
 
     /**
      * Headers fields for response consumer endpoint
