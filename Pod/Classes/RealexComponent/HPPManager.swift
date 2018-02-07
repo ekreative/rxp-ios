@@ -366,7 +366,7 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
         request.setValue("*/*", forHTTPHeaderField: "Accept")
         request.httpBody = self.getParametersString().data(using: String.Encoding.utf8)
         
-        for (key, value) in reqestProducerHeaders {
+        for (key, value) in requestProducerHeaders {
             request.setValue(value, forHTTPHeaderField: key)
         }
 
