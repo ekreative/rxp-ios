@@ -9,7 +9,7 @@ import UIKit
  */
 @objc public protocol HPPManagerDelegate {
 
-    @objc optional func HPPManagerCompletedWithResult(_ result: Dictionary <String, String>);
+    @objc optional func HPPManagerCompletedWithResult(_ result: Dictionary <String, Any>);
     @objc optional func HPPManagerFailedWithError(_ error: NSError?);
     @objc optional func HPPManagerCancelled();
 
@@ -357,7 +357,9 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
      */
     fileprivate func getHPPRequest() {
 
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        }
 
         let cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let request = NSMutableURLRequest(url: self.HPPRequestProducerURL, cachePolicy: cachePolicy, timeoutInterval: 30.0)
@@ -380,14 +382,18 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
                 }
                 else {
                     // error
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                    DispatchQueue.main.async {
+                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                    }
                     self.delegate?.HPPManagerFailedWithError!(error! as NSError)
                     self.hppViewController.dismiss(animated: true, completion: nil)
                 }
 
             } catch {
                 // error
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
                 self.delegate?.HPPManagerFailedWithError!(error as NSError)
                 self.hppViewController.dismiss(animated: true, completion: nil)
             }
@@ -399,8 +405,10 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
      Makes a network request to HPP, passing the encoded HPP Reqeust we received from the HPP Request Producer, the responce is a HTML Payment form which is displayed in the Web View.
      */
     fileprivate func getPaymentForm() {
-
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        }
 
         let cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringLocalCacheData
         let request = NSMutableURLRequest(url: self.HPPURL, cachePolicy: cachePolicy, timeoutInterval: 30.0)
@@ -424,7 +432,9 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
      */
     fileprivate func decodeHPPResponse(_ hppResponse: String) {
 
-        UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        DispatchQueue.main.async {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+        }
 
         let cachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
         var request = URLRequest(url: self.HPPResponseConsumerURL, cachePolicy: cachePolicy, timeoutInterval: 30.0)
@@ -445,14 +455,21 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
         let dataTask = session.dataTask(with: request, completionHandler: { (data:Data?, response:URLResponse?, error:Error?) -> Void in
             do {
                 // Stop the spinner
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                DispatchQueue.main.async {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                }
 
                 if let receivedData = data {
                     // success
-                    let decodedResponse = try JSONSerialization.jsonObject(with: receivedData, options: [JSONSerialization.ReadingOptions.allowFragments]) as! Dictionary <String, String>
-                    self.delegate?.HPPManagerCompletedWithResult!(decodedResponse)
-                }
-                else {
+                    let decodedResponse = try JSONSerialization.jsonObject(with: receivedData, options: [JSONSerialization.ReadingOptions.allowFragments])
+                    if let result = decodedResponse as? Dictionary <String, Any> {
+                        self.delegate?.HPPManagerCompletedWithResult?(result)
+                    } else {
+                        let err = NSError(domain: "realex", code: 1001, userInfo: [NSLocalizedDescriptionKey : "Validation payment response parsing error"])
+                        self.delegate?.HPPManagerFailedWithError?(err)
+                        self.hppViewController.dismiss(animated: true, completion: nil)
+                    }
+                } else {
                     // error
                     self.delegate?.HPPManagerFailedWithError!(error! as NSError)
                     self.hppViewController.dismiss(animated: true, completion: nil)
