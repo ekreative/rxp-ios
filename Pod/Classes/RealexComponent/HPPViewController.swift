@@ -11,8 +11,8 @@ import WebKit
  */
 @objc protocol HPPViewControllerDelegate {
     @objc optional func HPPViewControllerWillDismiss()
-    @objc optional func HPPViewControllerCompletedWithResult(_ result: String);
-    @objc optional func HPPViewControllerFailedWithError(_ error: NSError?);
+    @objc optional func HPPViewControllerCompletedWithResult(_ result: String)
+    @objc optional func HPPViewControllerFailedWithError(_ error: NSError?)
 }
 
 /// The Web View Controller which encapsulates the management of the webivew and the interaction with the HPP web page.

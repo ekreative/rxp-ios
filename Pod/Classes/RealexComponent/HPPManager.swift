@@ -503,8 +503,8 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
 
      - parameter error: The error which occured.
      */
-    func HPPViewControllerFailedWithError(_ error: Error?) {
-        self.delegate?.HPPManagerFailedWithError!(error as NSError?)
+    func HPPViewControllerFailedWithError(_ error: NSError?) {
+        self.delegate?.HPPManagerFailedWithError!(error)
         self.hppViewController.dismiss(animated: true, completion: nil)
     }
 
