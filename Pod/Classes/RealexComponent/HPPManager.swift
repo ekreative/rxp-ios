@@ -377,8 +377,18 @@ open class HPPManager: NSObject, UIWebViewDelegate, HPPViewControllerDelegate {
             do {
                 if let receivedData = data {
                     // success
-                    self.HPPRequest = try JSONSerialization.jsonObject(with: receivedData, options: []) as! NSDictionary
-                    self.getPaymentForm()
+                    let hppRequest = try JSONSerialization.jsonObject(with: receivedData, options: []) as! NSDictionary
+                    if let success = hppRequest["success"] as? NSNumber, let msg = hppRequest["msg"] as? String, !success.boolValue {
+                        DispatchQueue.main.async {
+                            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                        }
+                        let err = NSError(domain: "realex", code: 1000, userInfo: [NSLocalizedDescriptionKey: msg])
+                        self.delegate?.HPPManagerFailedWithError?(err)
+                        self.hppViewController.dismiss(animated: true, completion: nil)
+                    } else {
+                        self.HPPRequest = hppRequest
+                        self.getPaymentForm()
+                    }
                 }
                 else {
                     // error
